@@ -18,9 +18,7 @@
       --border-color: #8c3b0d;
       --wrath-red: #d93838;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       background-color: var(--bg-dark);
       color: var(--clay-light);
@@ -31,7 +29,6 @@
       align-items: center;
       padding: 20px;
     }
-
     .quest-container {
       max-width: 850px;
       width: 100%;
@@ -44,7 +41,6 @@
       display: flex;
       flex-direction: column;
     }
-
     /* Греческий меандровый орнамент */
     .meander-border {
       height: 18px;
@@ -57,7 +53,6 @@
       );
       width: 100%;
     }
-
     .hud-bar {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -66,37 +61,31 @@
       padding: 12px 20px;
       border-bottom: 2px solid var(--border-color);
     }
-
     .hud-item {
       display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
     }
-
     .hud-label {
       font-size: 0.75rem;
       color: var(--clay-dim);
       text-transform: uppercase;
       letter-spacing: 1px;
     }
-
     .hud-value {
       font-family: 'Cinzel', serif;
       font-size: 1.1rem;
       font-weight: 700;
       color: var(--terracotta-bright);
     }
-
     .hud-value.wrath { color: var(--wrath-red); }
-
     .content-area {
       padding: 30px 25px;
       display: flex;
       flex-direction: column;
       gap: 20px;
     }
-
     .chapter-title {
       font-family: 'Cinzel', serif;
       font-size: 1.5rem;
@@ -106,21 +95,18 @@
       text-transform: uppercase;
       letter-spacing: 1px;
     }
-
     .story-text {
       font-size: 1.1rem;
       line-height: 1.6;
       color: var(--clay-light);
       white-space: pre-line;
     }
-
     .choices-container {
       display: flex;
       flex-direction: column;
       gap: 12px;
       margin-top: 10px;
     }
-
     .choice-btn {
       background: linear-gradient(180deg, #2a221b 0%, #1a1410 100%);
       border: 1px solid var(--border-color);
@@ -136,21 +122,18 @@
       justify-content: space-between;
       align-items: center;
     }
-
     .choice-btn:hover {
       background: var(--terracotta);
       color: #000;
       border-color: var(--terracotta-bright);
       font-weight: bold;
     }
-
     .choice-effect {
       font-size: 0.85rem;
       opacity: 0.8;
       margin-left: 10px;
       font-style: italic;
     }
-
     .restart-btn {
       background-color: var(--terracotta);
       color: #000;
@@ -163,17 +146,14 @@
       text-transform: uppercase;
       margin-top: 20px;
     }
-
     .restart-btn:hover {
       background-color: var(--terracotta-bright);
     }
   </style>
 </head>
 <body>
-
   <div class="quest-container">
     <div class="meander-border"></div>
-
     <div class="hud-bar">
       <div class="hud-item">
         <span class="hud-label">Время в пути</span>
@@ -192,16 +172,13 @@
         <span class="hud-value" id="stat-morale">100%</span>
       </div>
     </div>
-
     <div class="content-area">
       <h2 class="chapter-title" id="chapter-title">Загрузка...</h2>
       <div class="story-text" id="story-text"></div>
       <div class="choices-container" id="choices-container"></div>
     </div>
-
     <div class="meander-border"></div>
   </div>
-
   <script src="script.js"></script>
 </body>
 </html>
