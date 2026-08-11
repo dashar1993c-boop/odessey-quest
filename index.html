@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+[8/12/2026 12:00 AM] Daria: <!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
@@ -17,8 +17,11 @@
       --clay-dim: #a6927d;
       --border-color: #8c3b0d;
       --wrath-red: #d93838;
+      --ending-gold: #ffd700;
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
       background-color: var(--bg-dark);
       color: var(--clay-light);
@@ -29,6 +32,7 @@
       align-items: center;
       padding: 20px;
     }
+
     .quest-container {
       max-width: 850px;
       width: 100%;
@@ -41,7 +45,7 @@
       display: flex;
       flex-direction: column;
     }
-    /* Греческий меандровый орнамент */
+
     .meander-border {
       height: 18px;
       background-color: var(--terracotta);
@@ -53,6 +57,7 @@
       );
       width: 100%;
     }
+
     .hud-bar {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -61,31 +66,37 @@
       padding: 12px 20px;
       border-bottom: 2px solid var(--border-color);
     }
+
     .hud-item {
       display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
     }
+
     .hud-label {
       font-size: 0.75rem;
       color: var(--clay-dim);
       text-transform: uppercase;
       letter-spacing: 1px;
     }
+
     .hud-value {
       font-family: 'Cinzel', serif;
       font-size: 1.1rem;
       font-weight: 700;
       color: var(--terracotta-bright);
     }
+
     .hud-value.wrath { color: var(--wrath-red); }
+
     .content-area {
       padding: 30px 25px;
       display: flex;
       flex-direction: column;
       gap: 20px;
     }
+
     .chapter-title {
       font-family: 'Cinzel', serif;
       font-size: 1.5rem;
@@ -95,18 +106,21 @@
       text-transform: uppercase;
       letter-spacing: 1px;
     }
+
     .story-text {
       font-size: 1.1rem;
       line-height: 1.6;
       color: var(--clay-light);
       white-space: pre-line;
     }
+
     .choices-container {
       display: flex;
       flex-direction: column;
       gap: 12px;
       margin-top: 10px;
     }
+
     .choice-btn {
       background: linear-gradient(180deg, #2a221b 0%, #1a1410 100%);
       border: 1px solid var(--border-color);
@@ -122,18 +136,21 @@
       justify-content: space-between;
       align-items: center;
     }
+
     .choice-btn:hover {
       background: var(--terracotta);
       color: #000;
       border-color: var(--terracotta-bright);
       font-weight: bold;
     }
+
     .choice-effect {
       font-size: 0.85rem;
       opacity: 0.85;
       margin-left: 10px;
       font-style: italic;
     }
+
     .restart-btn {
       background-color: var(--terracotta);
       color: #000;
@@ -146,17 +163,20 @@
       text-transform: uppercase;
       margin-top: 20px;
     }
+
     .restart-btn:hover {
       background-color: var(--terracotta-bright);
     }
   </style>
 </head>
 <body>
+
   <div class="quest-container">
     <div class="meander-border"></div>
+
     <div class="hud-bar">
       <div class="hud-item">
-        <span class="hud-label">Время в пути</span>
+        <span class="hud-label">Скитания</span>
         <span class="hud-value" id="stat-years">0 лет</span>
       </div>
       <div class="hud-item">
@@ -172,282 +192,404 @@
         <span class="hud-value" id="stat-morale">100%</span>
       </div>
     </div>
+
     <div class="content-area">
       <h2 class="chapter-title" id="chapter-title">Загрузка...</h2>
       <div class="story-text" id="story-text"></div>
       <div class="choices-container" id="choices-container"></div>
     </div>
+
     <div class="meander-border"></div>
   </div>
+
   <script>
-    // Состояние игры
     var state = {
       years: 0,
       crew: 600,
       wrath: 10,
       morale: 100,
+      hasMap: false,
       currentScene: 'start'
     };
+
     function modifyState(years, crewChange, wrathChange, moraleChange) {
-      state.years += years;
-      state.crew = Math.max(2, state.crew + crewChange);
+      state.years = Math.max(0, state.years + years);
+      state.crew = Math.max(1, state.crew + crewChange);
       state.wrath = Math.min(100, Math.max(0, state.wrath + wrathChange));
       state.morale = Math.min(100, Math.max(0, state.morale + moraleChange));
       updateHUD();
     }
+
     function updateHUD() {
       document.getElementById('stat-years').innerText = state.years.toFixed(1) + ' лет';
       document.getElementById('stat-crew').innerText = state.crew + ' воинов';
       document.getElementById('stat-wrath').innerText = state.wrath + '%';
       document.getElementById('stat-morale').innerText = state.morale + '%';
     }
+
     function goTo(sceneKey) {
       state.currentScene = sceneKey;
       var scene = story[sceneKey];
+      
       document.getElementById('chapter-title').innerText = scene.title;
-      if (sceneKey === 'ending') {
-        renderEnding();
+      
+      if (scene.isEnding) {
+        renderCustomEnding(scene);
         return;
       }
+
       document.getElementById('story-text').innerText = scene.text;
       var choicesContainer = document.getElementById('choices-container');
       choicesContainer.innerHTML = '';
+
       scene.choices.forEach(function(choice) {
         var btn = document.createElement('button');
         btn.className = 'choice-btn';
+        
         var textSpan = document.createElement('span');
         textSpan.innerText = choice.text;
+        
         var effectSpan = document.createElement('span');
         effectSpan.className = 'choice-effect';
         effectSpan.innerText = choice.effect;
+
         btn.appendChild(textSpan);
         btn.appendChild(effectSpan);
+        
         btn.onclick = function() {
           choice.action();
         };
+        
         choicesContainer.appendChild(btn);
       });
     }
-    function renderEnding() {
+
+    function renderCustomEnding(scene) {
       var totalTime = 10 + state.years;
-      var endingText = "Скитания Одиссея завершены.\n\n";
-      endingText += "• Общее время отсутствия: " + totalTime.toFixed(1) + " лет (10 лет войны + " + state.years.toFixed(1) + " лет скитаний).\n";
-      endingText += "• Выжившие спутники: " + (state.crew > 1 ? state.crew + " человек" : "Только сам Одиссей (все остальные погибли)") + ".\n";
-      endingText += "• Финальное отношение богов: " + (state.wrath < 30 ? "Олимп сменил гнев на милость" : "Посейдон навсегда затаил обиду") + ".\n\n";
-      endingText += "Вы очистили свой дом от заговорщиков, доказали Пенелопе свою личность через тайну оливкового ложа и восстановили мир на Итаке при поддержке Афины Паллады.";
+      var endingText = scene.text + "\n\n";
+      endingText += "═══════════════════════════════════\n";
+      endingText += "ИТОГИ ВАШЕГО ПОХОДА:\n";
+      endingText += "• Время отсутствия: " + totalTime.toFixed(1) + " лет (10 лет войны + " + state.years.toFixed(1) + " лет скитаний).\n";
+      endingText += "• Выжило спутников: " + state.crew + " из 600 воинов.\n";
+      endingText += "• Наличие финикийской карты: " + (state.hasMap ? "Да" : "Нет") + ".\n";
+      endingText += "• Уровень гнева Олимпа: " + state.wrath + "%.\n";
+
       document.getElementById('story-text').innerText = endingText;
       var choicesContainer = document.getElementById('choices-container');
       choicesContainer.innerHTML = '';
-      var restartBtn = document.createElement('button');
+[8/12/2026 12:00 AM] Daria: var restartBtn = document.createElement('button');
       restartBtn.className = 'restart-btn';
       restartBtn.innerText = 'Начать поход заново';
       restartBtn.onclick = resetGame;
       choicesContainer.appendChild(restartBtn);
     }
+
     function resetGame() {
-      state = { years: 0, crew: 600, wrath: 10, morale: 100, currentScene: 'start' };
+      state = { years: 0, crew: 600, wrath: 10, morale: 100, hasMap: false, currentScene: 'start' };
       updateHUD();
       goTo('start');
     }
-    // Сценарий квеста
+
     var story = {
       start: {
         title: "1. Отплытие из-под павшей Трои",
-        text: "Десять лет осады позади. Троя сожжена благодаря вашей хитрой деревянной лошадке. Двенадцать кораблей Итаки с шестью сотнями воинов выходят в Эгейское море. Гребцы поют песню о скором возвращении к жёнам, но олимпийские боги уже плетут свои сети...",
+        text: "Троя пала. Двенадцать кораблей Итаки готовятся к отплытию. В гавани стоит богатый финикийский купеческий галер, на борту которого скрываются редкие навигационные карты течений Эгейского моря.",
         choices: [
           {
-            text: "Принести пышные жертвы Зевсу перед отплытием",
-            effect: "+1 год, Гнев -10%",
-            action: function() { modifyState(1, 0, -10, 10); goTo('lotus'); }
+            text: "Захватить финикийскую галеру и забрать секретную карту мореходов!",
+            effect: "[КАРТА ПОЛУЧЕНА] Шанс быстрого пути!",
+            action: function() { 
+              state.hasMap = true;
+              modifyState(0.1, -5, 5, 10); 
+              goTo('map_navigation'); 
+            }
           },
           {
-            text: "Спешить домой без промедления!",
-            effect: "Гнев +15%",
-            action: function() { modifyState(0, 0, 15, -10); goTo('lotus'); }
+            text: "Плыть по стандарту, принеся пышную жертву Афине",
+            effect: "Стандартный путь, Гнев -10%",
+            action: function() { modifyState(0.2, 0, -10, 10); goTo('great_storm'); }
+          },
+          {
+            text: "Разграбить город киконов для наживы",
+            effect: "+1 год, -40 воинов, Гнев +15%",
+            action: function() { modifyState(1, -40, 15, -10); goTo('lotus'); }
           }
         ]
       },
+
+      map_navigation: {
+        title: "ЭКСПРЕСС-ПУТЬ: Навигация по финикийской карте",
+        text: "Секретные папирусы финикийцев указывают скрытые подводные течения и безопасные фарватеры в обход владений чудовищ и киклопов!",
+        choices: [
+          {
+            text: "Следовать тайному южному течению прямо к Итаке",
+            effect: "Сократить скитания до 1 года!",
+            action: function() { modifyState(0.8, 0, -10, 20); goTo('aeolus'); }
+          },
+          {
+            text: "Использовать карту для захода на Остров Эола за ветром",
+            effect: "Мгновенный перелет к Итаке",
+            action: function() { modifyState(0.3, 0, -10, 30); goTo('aeolus'); }
+          }
+        ]
+      },
+
+      great_storm: {
+        title: "2. Великий Шторм у Мыса Малея",
+        text: "Черные тучи закрыли солнце. Ревущий северный ветер сносит корабли к мелям и скалам. Волны захлестывают палубу!",
+        choices: [
+          {
+            text: "Приказать грести под углом 45 градусов к волне и держать курс по компасу Зевса",
+            effect: "ПРАВИЛЬНЫЙ МАНЕВР! Без потерь пройти шторм",
+            action: function() { modifyState(0.2, 0, -10, 15); goTo('cyclops'); }
+          },
+          {
+            text: "Спустить паруса и отдаться воле стихии",
+            effect: "Унесет к Острову Лотофагов (+1 год)",
+            action: function() { modifyState(1, -15, 10, -10); goTo('lotus'); }
+          },
+          {
+            text: "Бросить тяжелые якорные камни прямо на глубине",
+            effect: "Тросы рвутся, потери людей (-50 воинов)",
+            action: function() { modifyState(0.5, -50, 15, -20); goTo('cyclops'); }
+          }
+        ]
+      },
+
       lotus: {
-        title: "2. Остров Лотофагов",
-        text: "Шторм пригнал корабли к берегу, где местные жители питаются сладкими цветами лотоса. Отправив разведку, вы обнаруживаете, что ваши воины забыли Итаку, семьи и долг — они сидят в блаженной нирване и жуют бутоны.",
+        title: "3. Остров Лотофагов",
+        text: "Ваши воины попробовали сладкий лотос и забыли об Итаке. Они сидят на траве и блаженно улыбаются.",
         choices: [
           {
-            text: "Силой притащить дураков на корабли и связать под банками",
-            effect: "+0.5 года, Мораль -10%",
-            action: function() { modifyState(0.5, 0, 0, -10); goTo('cyclops'); }
+            text: "Связать их и забросить на корабли силачи-офицеры",
+            effect: "+0.3 года, Скоростное отплытие",
+            action: function() { modifyState(0.3, 0, 0, -5); goTo('cyclops'); }
           },
           {
-            text: "Оставить отведавших лотоса и отплыть с верными",
-            effect: "-12 воинов",
-            action: function() { modifyState(0, -12, 0, 5); goTo('cyclops'); }
+            text: "Бросить дураков и плыть дальше",
+            effect: "-20 воинов",
+            action: function() { modifyState(0, -20, 0, 0); goTo('cyclops'); }
           }
         ]
       },
+
       cyclops: {
-        title: "3. Пещера Киклопа Полифема",
-        text: "Вы заперты в пещере одноглазого гиганта Полифема, сына Посейдона. Он уже позавтракал двумя вашими воинами. У вас есть огромный сосновый кол и мех с крепким фракийским вином.",
+        title: "4. Пещера Киклопа Полифема",
+        text: "Вы вошли в пещеру одноглазого гиганта Полифема. В углу стоят головки сыра и кувшины с молоком.",
         choices: [
           {
-            text: "Напоить Полифема, назваться «Никем» и ослепить во сне",
-            effect: "-6 воинов, Гнев Посейдона +40%",
-            action: function() { modifyState(1, -6, 40, -10); goTo('aeolus'); }
+            text: "Не трогать сыр! Уважить хозяина и вежливо попросить о гостеприимстве",
+            effect: "Альтернативный путь! Без проклятия Посейдона!",
+            action: function() { modifyState(0.2, 0, -20, 10); goTo('aeolus'); }
           },
           {
-            text: "Выкрасть ключи и попытаться сбежать тихо ночью",
-            effect: "-30 воинов, Гнев +10%",
-            action: function() { modifyState(0.5, -30, 10, -20); goTo('aeolus'); }
+            text: "Жрать сыр без спроса, напоить гиганта вином и проткнуть ему глаз",
+            effect: "Проклятие Посейдона! Гнев +50%",
+            action: function() { modifyState(1, -10, 50, -10); goTo('aeolus'); }
           }
         ]
       },
+
       aeolus: {
-        title: "4. Остров Эола — Повелителя Ветров",
-        text: "Эол дарит вам кожаный мех, в который завязаны все буйные ветры, кроме попутного Зефира. Родная Итака уже виднеется на горизонте! Но когда вы засыпаете от усталости, спутники начинают шептаться, что в мешке скрыто троянское золото...",
+        title: "5. Остров Эола — Повелителя Ветров",
+        text: "Эол вручает вам мех со скованными буйными ветрами. До Итаки остаётся всего день пути! Вдалеке уже видны костры пастухов родного острова. Вы смертельно устали.",
         choices: [
           {
-            text: "Спать. Вы не спали трое суток...",
-            effect: "Буря отбрасывает назад! +2 года",
-            action: function() { modifyState(2, -20, 15, -20); goTo('laestrygonians'); }
+            text: "Не смыкать глаз и лично вести корабль в гавань",
+            effect: "Шанс сразу попасть домой!",
+            action: function() { 
+              if (state.hasMap || state.wrath < 30) {
+                if (state.hasMap) {
+                  goTo('ending_legendary');
+                } else {
+                  goTo('ithaca_battle');
+                }
+              } else {
+                modifyState(0.2, 0, 0, 10); goTo('laestrygonians');
+              }
+            }
           },
           {
-            text: "Держать мех в руках и не смыкать глаз",
-            effect: "Успешный причал на время, Гнев +5%",
-            action: function() { modifyState(0.5, 0, 5, 10); goTo('laestrygonians'); }
+            text: "Уснуть. Спутники сами доплывут...",
+            effect: "Команда открывает мех!",
+            action: function() { 
+              if (state.wrath > 40) {
+                goTo('ending_storm_death');
+              } else {
+                modifyState(2, -30, 20, -20); goTo('laestrygonians');
+              }
+            }
           }
         ]
       },
+
       laestrygonians: {
-        title: "5. Лестригоны-людоеды",
-        text: "Ваш флот заходит в уютную гавань, окружённую скалами. Местные жители оказываются исполинскими людоедами. Они начинают швырять в корабли огромные валуны и нанизывать воинов на пики, как рыбу!",
+        title: "6. Лестригоны-людоеды",
+        text: "Гиганты-людоеды швыряют утесы в ваши корабли. У вас есть секунда на решение.",
         choices: [
           {
-            text: "Приказать своему кораблю перерубить канаты и бежать из гавани",
-            effect: "Потеря большинства кораблей и воинов",
-            action: function() {
-              var currentCrew = state.crew;
-              modifyState(0.5, -Math.floor(currentCrew * 0.8), 10, -30);
-              goTo('circe');
-            }
+            text: "Перерубить канат только своего флагмана и уходить в море",
+            effect: "-450 воинов, быстрый побег",
+            action: function() { modifyState(0.2, -450, 0, -30); goTo('circe'); }
           },
           {
-            text: "Попытаться принять бой на берегу и спасти флот",
-            effect: "Тяжёлые потери, +2 года",
-            action: function() {
-              var currentCrew = state.crew;
-              modifyState(2, -Math.floor(currentCrew * 0.9), 20, -40);
-              goTo('circe');
-            }
+            text: "Пытаться вытащить весь флот из узкого затона",
+            effect: "+2 года, -500 воинов",
+            action: function() { modifyState(2, -500, 10, -40); goTo('circe'); }
           }
         ]
       },
+
       circe: {
-        title: "6. Остров Ээя и чары Цирцеи",
-        text: "Красивая волшебница Цирцея превратила вашу разведку в упитанных свиней. Бог Гермес даёт вам волшебный корень «моли», защищающий от магии, и пару пикантных советов.",
+        title: "7. Остров Ээя и чары Цирцеи",
+        text: "Волшебница Цирцея превратила половину вашей команды в свиней и приглашает вас на пир. Гермес дал вам защитный корень, но волшебный напиток выглядит невероятно искусительно...",
         choices: [
           {
-            text: "Принять приглашение Цирцеи, обнажить меч и остаться на год",
-            effect: "+1 год, Мораль +30%",
-            action: function() { modifyState(1, 0, -10, 30); goTo('underworld'); }
+            text: "Выбросить корень Гермеса и выпить зелье Цирцеи с голоду",
+            effect: "Секретный финал!",
+            action: function() { goTo('ending_pig'); }
           },
           {
-            text: "Заставить её вернуть людям облик и немедленно отплыть",
-            effect: "+0.5 года, Гнев +10%",
-            action: function() { modifyState(0.5, 0, 10, -10); goTo('underworld'); }
+            text: "Съесть корень, пригрозить Цирцее мечом и спасти друзей",
+            effect: "+0.5 года, Путь продолжается",
+            action: function() { modifyState(0.5, 0, -10, 20); goTo('underworld'); }
           }
         ]
       },
+
       underworld: {
-        title: "7. Царство Аида (Некромантия)",
-        text: "Вы спустились на край земли, чтобы принести жертву и спросить тень слепого пророка Тиресия о дороге домой. В тумане к вам подходят тени вашей матери и павших под Троей друзей — Ахилла и Агамемнона.",
+        title: "8. Царство Аида",
+        text: "Вы призвали пророка Тиресия. Он указывает прямой безопасный маршрут, но требует принести в жертву черного барана.",
         choices: [
           {
-            text: "Выслушать строгие пророчества Тиресия и предостережения Ахилла",
-            effect: "+1 год, Гнев -10%",
-            action: function() { modifyState(1, 0, -10, 0); goTo('sirens'); }
+            text: "Исполнить ритуал точно по инструкции Тиресия",
+            effect: "Гнев -20%, Ускорение похода",
+            action: function() { modifyState(0.3, 0, -20, 10); goTo('sirens'); }
           },
           {
-            text: "Быстро расспросить мать и скорее бежать от мрака Аида",
-            effect: "Мораль -15%",
-            action: function() { modifyState(0.5, 0, 5, -15); goTo('sirens'); }
+            text: "Сэкономить жертвенный скот и уплыть быстрее",
+            effect: "Гнев +15%",
+            action: function() { modifyState(0.1, 0, 15, -10); goTo('sirens'); }
           }
         ]
       },
+
       sirens: {
-        title: "8. Сирены, Сцилла и Харибда",
-        text: "Впереди сладкоголосые Сирены и узкий пролив между монстром Сциллой с шестью головами и водоворотом Харибдой. Приказать залить уши воском — разумно, но кого принести в жертву?",
-        choices: [
+        title: "9. Сирены и пролив",
+        text: "Впереди узкий пролив Сциллы и Харибды. У вас в руках финикийская карта или знания пророка.",
+[8/12/2026 12:00 AM] Daria: choices: [
           {
-            text: "Прижаться к Сцилле (потерять 6 воинов, но спасти корабль)",
-            effect: "-6 воинов",
-            action: function() { modifyState(0.5, -6, 0, -10); goTo('helios'); }
+            text: "Идти прямо сквозь Сциллу и Харибду (залив уши воском)",
+            effect: "-6 воинов, Сохранить 3 года пути",
+            action: function() { modifyState(0.2, -6, 0, -10); goTo('helios'); }
           },
           {
-            text: "Пройти по центру между Харибдой и Сциллой",
-            effect: "-15 воинов, Гнев +20%",
-            action: function() { modifyState(1, -15, 20, -20); goTo('helios'); }
+            text: "Обогнуть опасный пролив по дальнему круговому маршруту",
+            effect: "+3 года пути, Воины целы",
+            action: function() { modifyState(3, 0, -10, 0); goTo('helios'); }
           }
         ]
       },
+
       helios: {
-        title: "9. Священные быки Гелиоса",
-        text: "Буря заперла вас на острове Фринакия. Еда кончилась. Пока вы молились в глубине острова, голодные спутники закололи священных золотых быков бога Солнца Гелиоса. Разгневанный бог грозит уйти в Аид!",
+        title: "10. Быки Гелиоса",
+        text: "Ваши люди умирают от голода на острове Солнца. На лугу пасутся священные быки.",
         choices: [
           {
-            text: "Выйти в море. Принять карающую молнию Зевса",
-            effect: "Гибель всех спутников. Одиссей выживает один",
-            action: function() {
-              modifyState(2, 0, 30, -50);
-              state.crew = 1;
-              updateHUD();
-              goTo('calypso');
+            text: "Жестко запретить трогать быков, питаться моллюсками и кореньями",
+            effect: "Сохранить флот и людей!",
+            action: function() { modifyState(0.5, 0, -30, -20); goTo('phaeacians'); }
+          },
+          {
+            text: "Заколоть быков (Зевс уничтожит корабль молнией)",
+            effect: "Гибель спутников, плен у Калипсо",
+            action: function() { 
+              modifyState(1, -(state.crew - 1), 20, -50); 
+              goTo('calypso'); 
             }
           }
         ]
       },
+
       calypso: {
-        title: "10. Плен у нимфы Калипсо",
-        text: "Вы выброшены штормом на остров Огигия. Нимфа Калипсо влюблена в вас, предлагает бессмертие и вечную молодость. Проходит 7 лет, пока Афина не умоляет Зевса вмешаться.",
+        title: "11. Плен у нимфы Калипсо",
+        text: "Вы выброшены на остров Огигия. Прекрасная нимфа Калипсо предлагает вам любовь, вечную молодость и бессмертие, если вы останетесь с ней.",
         choices: [
           {
-            text: "Отвергнуть бессмертие, построить плот и плыть к Пенелопе",
-            effect: "+7 лет, Гнев -20%",
-            action: function() { modifyState(7, 0, -20, 20); goTo('phaeacians'); }
-          }
-        ]
-      },
-      phaeacians: {
-        title: "11. Страна Феаков (Схерия)",
-        text: "Посейдон разбивает ваш плот, но юная царевна Навсикая находит вас на берегу. Царь Алкиной устраивает пир, где вы рассказываете свои легендарные приключения.",
-        choices: [
-          {
-            text: "Принять быстрый волшебный корабль феаков до Итаки",
-            effect: "+0.5 года, Полный отдых",
-            action: function() { modifyState(0.5, 0, -10, 50); goTo('ithaca_battle'); }
-          }
-        ]
-      },
-      ithaca_battle: {
-        title: "12. Битва в зале Итаки (Финал)",
-        text: "Вы вернулись нищим стариком. В вашем доме 108 дерзких женихов пируют и разоряют царство. Пенелопа объявляет испытание: тот, кто натянет тугой лук Одиссея и прострелит 12 колец, станет её мужем. Вы берёте лук в руки...",
-        choices: [
-          {
-            text: "Запереть двери зала и перебить всех женихов до единого!",
-            effect: "Кровавая победа, возвращение трона",
-            action: function() { goTo('ending'); }
+            text: "Остаться с Калипсо и стать бессмертным богом",
+            effect: "ФИНАЛ: Бессмертие",
+            action: function() { goTo('ending_calypso'); }
           },
           {
-            text: "Предложить помилование тем, кто сложит оружие и возместит ущерб",
-            effect: "Менее кровавый финал",
-            action: function() { goTo('ending'); }
+            text: "Скучать по Итаке, построить плот и уйти в море",
+            effect: "+7 лет скитаний",
+            action: function() { modifyState(7, 0, -10, 10); goTo('phaeacians'); }
           }
         ]
       },
-      ending: {
-        title: "Эпилог: Возвращение Царя",
-        text: "",
-        choices: []
+
+      phaeacians: {
+        title: "12. Страна Феаков",
+        text: "Доброжелательный царь Алкиной предлагает снарядить магический быстроходный корабль, который доставит вас на Итаку за одну ночь.",
+        choices: [
+          {
+            text: "Взойти на волшебный корабль феаков",
+            effect: "Мгновенное прибытие на Итаку!",
+            action: function() { modifyState(0.1, 0, -10, 50); goTo('ithaca_battle'); }
+          }
+        ]
+      },
+
+      ithaca_battle: {
+        title: "13. Возвращение на Итаку",
+        text: "Вы в родном дворце под видом нищего. 108 женихов требуют руки Пенелопы. В ваших руках снова оказывается ваш легендарный лук.",
+        choices: [
+          {
+            text: "Запереть все двери и перебить всех женихов без пощады!",
+            effect: "ФИНАЛ: Кровавая победа",
+            action: function() { goTo('ending_bloody_victory'); }
+          },
+          {
+            text: "Помиловать раскаявшихся, принять выкуп и избежать войны с их семьями",
+            effect: "ФИНАЛ: Дипломатический мир",
+            action: function() { goTo('ending_peaceful_king'); }
+          }
+        ]
+      },
+
+      // === ВСЕ 7 ВАРИАНТОВ КОНЦОВОК ===
+      ending_legendary: {
+        isEnding: true,
+        title: "КОНЦОВКА: Легендарный Навигатор",
+        text: "Благодаря финикийской карте течений и грамотному маневрированию в штормах вы вернулись на Итаку за рекордный 1 год!\n\nВсе 600 воинов вернулись живыми к своим семьям. Вы разгромили женихов свежими силами закаленной троянской армии, став величайшим мореплавателем Эллады!"
+      },
+      ending_pig: {
+        isEnding: true,
+        title: "КОНЦОВКА: Свиной Владыка Итаки",
+        text: "Вы поддались искушению и осушили кубок Цирцеи. Волшебный напиток превратил вас в упитанного хряка с царственной щетиной.\n\nЦирцея почесала вас за ухом и выделила отдельный золотой загон. Вы забыли про Итаку, Пенелопу и войну. Жизнь удалась, хоть и на четырех копытах."
+      },
+      ending_storm_death: {
+        isEnding: true,
+        title: "КОНЦОВКА: Погибший у порога",
+        text: "Когда команда вскрыла мех Эола прямо у берегов Итаки, разгневанные ветры и ярость Посейдона породили невиданный шторм.\n\nТвой корабль разбился о прибрежные скалы родного острова. Выплеснутый на берег Одиссей испустил последний вдох, так и не обняв Пенелопу."
+      },
+      ending_calypso: {
+        isEnding: true,
+        title: "КОНЦОВКА: Бессмертный Бог Огигии",
+        text: "Вы приняли дар Калипсо. Смертная жизнь, боль потерь и седеющая Пенелопа остались в прошлом.\n\nТеперь вы юный бессмертный полубог, проводите века в тропических садах Огигии, изредка попивая нектар и наблюдая, как на Итаке сменяются династии."
+      },
+      ending_bloody_victory: {
+        isEnding: true,
+        title: "КОНЦОВКА: Кровавый Царь Итаки",
+        text: "Стрелы Одиссея не знали промаха. Зал дворца был залит кровью 108 женихов. Вы вернули трон и Пенелопу, показав всему Средиземноморью, что бывает с теми, кто посягает на дом царя Итаки."
+      },
+      ending_peaceful_king: {
+        isEnding: true,
+        title: "КОНЦОВКА: Мудрый и Милосердный Солон",
+        text: "Вы проявили мудрость великого правителя. Казнив лишь самых дерзких зачинщиков, вы заставили остальных выплатить огромную компенсацию скотом и золотом.\n\nИтака расцвела без междоусобной войны, а боги благословили ваше правление."
       }
     };
-    // Запуск игры после полной загрузки страницы
+
     window.addEventListener('DOMContentLoaded', function() {
       updateHUD();
       goTo('start');
