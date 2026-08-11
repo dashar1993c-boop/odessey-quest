@@ -125,9 +125,9 @@
       background: linear-gradient(180deg, #2a221b 0%, #1a1410 100%);
       border: 1px solid var(--border-color);
       color: var(--clay-light);
-      padding: 16px 20px;
+      padding: 14px 18px;
       font-family: 'Philosopher', serif;
-      font-size: 1.05rem;
+      font-size: 1rem;
       text-align: left;
       cursor: pointer;
       border-radius: 3px;
@@ -142,6 +142,15 @@
       color: #000;
       border-color: var(--terracotta-bright);
       font-weight: bold;
+    }
+
+    .choice-effect {
+      font-size: 0.85rem;
+      opacity: 0.85;
+      margin-left: 10px;
+      font-style: italic;
+      text-align: right;
+      min-width: 140px;
     }
 
     .restart-btn {
@@ -241,8 +250,13 @@
         
         var textSpan = document.createElement('span');
         textSpan.innerText = choice.text;
+        
+        var effectSpan = document.createElement('span');
+        effectSpan.className = 'choice-effect';
+        effectSpan.innerText = choice.effect;
 
         btn.appendChild(textSpan);
+        btn.appendChild(effectSpan);
         
         btn.onclick = function() {
           choice.action();
@@ -265,7 +279,6 @@
       document.getElementById('story-text').innerText = endingText;
       var choicesContainer = document.getElementById('choices-container');
       choicesContainer.innerHTML = '';
-
       var restartBtn = document.createElement('button');
       restartBtn.className = 'restart-btn';
       restartBtn.innerText = 'Начать поход заново';
@@ -278,13 +291,15 @@
       updateHUD();
       goTo('start');
     }
- var story = {
+
+    var story = {
       start: {
         title: "1. Отплытие из-под павшей Трои",
         text: "Троя пала. Двенадцать кораблей Итаки готовятся к отплытию. В гавани стоит богатая финикийская галера, на борту которой скрываются секретные навигационные карты течений Эгейского моря.",
         choices: [
           {
             text: "Захватить финикийскую галеру и забрать секретную карту мореходов",
+            effect: "[КАРТА] Тайные маршруты",
             action: function() { 
               state.hasMap = true;
               modifyState(0.1, -5, 5, 10); 
@@ -293,10 +308,12 @@
           },
           {
             text: "Плыть по стандарту, принеся пышную жертву Афине",
+            effect: "Гнев -10%",
             action: function() { modifyState(0.2, 0, -10, 10); goTo('great_storm'); }
           },
           {
             text: "Разграбить город киконов для наживы",
+            effect: "+1 год, -40 воинов, Гнев +15%",
             action: function() { modifyState(1, -40, 15, -10); goTo('lotus'); }
           }
         ]
@@ -308,10 +325,12 @@
         choices: [
           {
             text: "Следовать тайному южному течению прямо к Итаке",
+            effect: "Сократить скитания до 1 года",
             action: function() { modifyState(0.8, 0, -10, 20); goTo('aeolus'); }
           },
           {
             text: "Использовать карту для захода на Остров Эола за попутным ветром",
+            effect: "Сверхбыстрый маршрут",
             action: function() { modifyState(0.3, 0, -10, 30); goTo('aeolus'); }
           }
         ]
@@ -323,14 +342,17 @@
         choices: [
           {
             text: "Приказать грести под углом 45 градусов к волне и держать курс по звёздам",
+            effect: "Без потерь пройти шторм",
             action: function() { modifyState(0.2, 0, -10, 15); goTo('cyclops'); }
           },
           {
             text: "Спустить паруса и отдаться воле стихии",
+            effect: "Унесет к Острову Лотофагов (+1 год)",
             action: function() { modifyState(1, -15, 10, -10); goTo('lotus'); }
           },
           {
             text: "Бросить тяжелые якорные камни прямо на глубине",
+            effect: "Тросы рвутся (-50 воинов)",
             action: function() { modifyState(0.5, -50, 15, -20); goTo('cyclops'); }
           }
         ]
@@ -341,11 +363,13 @@
         text: "Ваши воины попробовали сладкий лотос и забыли об Итаке. Они сидят на траве и блаженно улыбаются.",
         choices: [
           {
-            text: "Связать их и забросить на корабли",
+            text: "Связать их и забросить на корабли силачами-офицерами",
+            effect: "+0.3 года, Ускорение",
             action: function() { modifyState(0.3, 0, 0, -5); goTo('cyclops'); }
           },
           {
             text: "Бросить отведавших лотос и отплыть дальше",
+            effect: "-20 воинов",
             action: function() { modifyState(0, -20, 0, 0); goTo('cyclops'); }
           }
         ]
@@ -357,10 +381,12 @@
         choices: [
           {
             text: "Не трогать сыр, уважить хозяина и вежливо попросить о гостеприимстве",
+            effect: "Без проклятия Посейдона!",
             action: function() { modifyState(0.2, 0, -20, 10); goTo('aeolus'); }
           },
           {
             text: "Съесть сыр без спроса, напоить гиганта вином и ослепить его во сне",
+            effect: "Проклятие! Гнев +50%",
             action: function() { modifyState(1, -10, 50, -10); goTo('aeolus'); }
           }
         ]
@@ -372,6 +398,7 @@
         choices: [
           {
             text: "Не смыкать глаз и лично вести корабль в гавань",
+            effect: "Возможность избежать бурь",
             action: function() { 
               if (state.hasMap || state.wrath < 30) {
                 if (state.hasMap) {
@@ -386,6 +413,7 @@
           },
           {
             text: "Уснуть и доверить штурвал команде",
+            effect: "Команда открывает мех!",
             action: function() { 
               if (state.wrath > 40) {
                 goTo('ending_storm_death');
@@ -403,10 +431,12 @@
         choices: [
           {
             text: "Перерубить канат только своего флагмана и уходить в море",
+            effect: "-450 воинов, быстрый побег",
             action: function() { modifyState(0.2, -450, 0, -30); goTo('circe'); }
           },
           {
             text: "Пытаться вытащить весь флот из узкого затона",
+            effect: "+2 года, -500 воинов",
             action: function() { modifyState(2, -500, 10, -40); goTo('circe'); }
           }
         ]
@@ -417,11 +447,13 @@
         text: "Волшебница Цирцея превратила половину вашей команды в свиней и приглашает вас на пир. Гермес дал вам защитный корень, но волшебный напиток выглядит невероятно искусительно...",
         choices: [
           {
-            text: "Выбросить корень Гермеса и выпить похлебку Цирцеи с голоду",
+            text: "Выбросить корень Гермеса и выпить зелье Цирцеи с голоду",
+            effect: "Остаться животным навсегда",
             action: function() { goTo('ending_pig'); }
           },
           {
             text: "Съесть корень, пригрозить Цирцее мечом и спасти друзей",
+            effect: "+0.5 года, Путь продолжается",
             action: function() { modifyState(0.5, 0, -10, 20); goTo('underworld'); }
           }
         ]
@@ -433,10 +465,12 @@
         choices: [
           {
             text: "Исполнить ритуал точно по инструкции Тиресия",
+            effect: "Гнев -20%, Ускорение",
             action: function() { modifyState(0.3, 0, -20, 10); goTo('sirens'); }
           },
           {
             text: "Сэкономить жертвенный скот и уплыть быстрее",
+            effect: "Гнев +15%",
             action: function() { modifyState(0.1, 0, 15, -10); goTo('sirens'); }
           }
         ]
@@ -448,10 +482,12 @@
         choices: [
           {
             text: "Идти прямо сквозь Сциллу и Харибду (залив уши воском)",
-            action: function() { modifyState(0.2, -6, 0, -10); goTo('helios'); }
+            effect: "-6 воинов, сэкономить 3 года",
+action: function() { modifyState(0.2, -6, 0, -10); goTo('helios'); }
           },
           {
             text: "Обогнуть опасный пролив по дальнему круговому маршруту",
+            effect: "+3 года пути, воины целы",
             action: function() { modifyState(3, 0, -10, 0); goTo('helios'); }
           }
         ]
@@ -463,10 +499,12 @@
         choices: [
           {
             text: "Жестко запретить трогать быков, питаться моллюсками и кореньями",
+            effect: "Сохранить флот и людей!",
             action: function() { modifyState(0.5, 0, -30, -20); goTo('phaeacians'); }
           },
           {
             text: "Заколоть быков для утоления голода",
+            effect: "Молния Зевса, плен у Калипсо",
             action: function() { 
               modifyState(1, -(state.crew - 1), 20, -50); 
               goTo('calypso'); 
@@ -480,21 +518,25 @@
         text: "Вы выброшены на остров Огигия. Прекрасная нимфа Калипсо предлагает вам любовь, вечную молодость и бессмертие, если вы останетесь с ней.",
         choices: [
           {
-            text: "Остаться с Калипсо и стать бессмертным богом",
+            text: "Остаться с Калипсо",
+            effect: "Обрести бессмертие вдали от дома",
             action: function() { goTo('ending_calypso'); }
           },
           {
             text: "Отвергнуть бессмертие, построить плот и уйти в море",
+            effect: "+7 лет скитаний",
             action: function() { modifyState(7, 0, -10, 10); goTo('phaeacians'); }
           }
         ]
       },
-[8/12/2026 12:13 AM] Daria: phaeacians: {
+
+      phaeacians: {
         title: "12. Страна Феаков",
         text: "Доброжелательный царь Алкиной предлагает снарядить магический быстроходный корабль, который доставит вас на Итаку за одну ночь.",
         choices: [
           {
             text: "Взойти на волшебный корабль феаков",
+            effect: "Мгновенное прибытие на Итаку!",
             action: function() { modifyState(0.1, 0, -10, 50); goTo('ithaca_battle'); }
           }
         ]
@@ -506,16 +548,18 @@
         choices: [
           {
             text: "Запереть все двери и перебить всех женихов без пощады",
+            effect: "Беспощадная расправа",
             action: function() { goTo('ending_bloody_victory'); }
           },
           {
             text: "Помиловать раскаявшихся, принять выкуп и избежать войны с их семьями",
+            effect: "Мирное разрешение конфликта",
             action: function() { goTo('ending_peaceful_king'); }
           }
         ]
       },
 
-      // === ИТОГИ ПОХОДА (КОНЦОВКИ) ===
+      // === ИТОГИ ПОХОДА ===
       ending_legendary: {
         isEnding: true,
         title: "ИТОГ: Легендарный Навигатор",
@@ -531,27 +575,3 @@
         title: "ИТОГ: Погибший у порога",
         text: "Когда команда вскрыла мех Эола прямо у берегов Итаки, разгневанные ветры и ярость Посейдона породили невиданный шторм.\n\nТвой корабль разбился о прибрежные скалы родного острова. Выплеснутый на берег Одиссей испустил последний вдох, так и не обняв Пенелопу."
       },
-      ending_calypso: {
-        isEnding: true,
-        title: "ИТОГ: Бессмертный Бог Огигии",
-        text: "Вы приняли дар Калипсо. Смертная жизнь, боль потерь и седеющая Пенелопа остались в прошлом.\n\nТеперь вы юный бессмертный полубог, проводите века в тропических садах Огигии, изредка попивая нектар и наблюдая, как на Итаке сменяются династии."
-      },
-      ending_bloody_victory: {
-        isEnding: true,
-        title: "ИТОГ: Кровавый Царь Итаки",
-        text: "Стрелы Одиссея не знали промаха. Зал дворца был залит кровью 108 женихов. Вы вернули трон и Пенелопу, показав всему Средиземноморью, что бывает с теми, кто посягает на дом царя Итаки."
-      },
-      ending_peaceful_king: {
-        isEnding: true,
-        title: "ИТОГ: Мудрый и Милосердный Солон",
-        text: "Вы проявили мудрость великого правителя. Казнив лишь самых дерзких зачинщиков, вы заставили остальных выплатить огромную компенсацию скотом и золотом.\n\nИтака расцвела без междоусобной войны, а боги благословили ваше правление."
-      }
-    };
-
-    window.addEventListener('DOMContentLoaded', function() {
-      updateHUD();
-      goTo('start');
-    });
-  </script>
-</body>
-</html>
