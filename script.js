@@ -66,5 +66,3 @@ function resetGame() {
 // Запуск игры
 updateHUD();
 goTo('start');
-updateHUD();
-goTo('start');
